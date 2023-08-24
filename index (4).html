@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<script src="https://widget.cloudpayments.ru/bundles/cloudpayments.js"></script>
+<script src="https://checkout.cloudpayments.ru/checkout.js"></script>
+<body>
+
+<h2>Регистрация и инициализация платежа</h2>
+
+<!-- <form action="http://localhost:8000/user/pay/" method="POST"> -->
+<form>
+  <label for="email">Email:</label><br>
+  <input type="text" id="email" name="email"><br>
+  <label for="terminal_key">TerminalKey:</label><br>
+  <input type="text" id="terminal_key" name="terminal_key" value="1690199941095DEMO"><br>
+  <label for="description">Description:</label><br>
+  <input type="text" id="description" name="description" value="Демо доступ на 168 часов"><br>
+  <br>
+  <input id="checkout" type="button" value="Отправить">
+</form>
+</body>
+<script>
+  
+  this.pay = function () {
+    var widget = new cp.CloudPayments();
+    var receipt = {
+            Items: [//товарные позиции
+                 {
+                    label: 'Наименование товара 3', //наименование товара
+                    price: 27.00, //цена
+                    quantity: 1.00, //количество
+                    amount: 27.00, //сумма
+                    vat: 0, //ставка НДС
+                    method: 0, // тег-1214 признак способа расчета - признак способа расчета
+                    object: 0, // тег-1212 признак предмета расчета - признак предмета товара, работы, услуги, платежа, выплаты, иного предмета расчета
+                }
+            ],
+            taxationSystem: 0, //система налогообложения; необязательный, если у вас одна система налогообложения
+            email: 'user@example.com', //e-mail покупателя, если нужно отправить письмо с чеком
+            phone: '', //телефон покупателя в любом формате, если нужно отправить сообщение со ссылкой на чек
+            isBso: false, //чек является бланком строгой отчетности
+            amounts:
+            {
+                electronic: 27.00, // Сумма оплаты электронными деньгами
+                advancePayment: 0.00, // Сумма из предоплаты (зачетом аванса) (2 знака после запятой)
+                credit: 0.00, // Сумма постоплатой(в кредит) (2 знака после запятой)
+                provision: 0.00 // Сумма оплаты встречным предоставлением (сертификаты, др. мат.ценности) (2 знака после запятой)
+            }
+        };
+
+    var data = {};
+    data.CloudPayments = {
+        CustomerReceipt: receipt, //чек для первого платежа
+        recurrent: {
+         interval: 'Day',
+         period: 1, 
+         customerReceipt: receipt //чек для регулярных платежей
+         }
+         }; //создание ежемесячной подписки
+
+    widget.charge({ // options
+        publicId: 'pk_1930e66504eaf1c60a20ea8a57909', //id из личного кабинета
+        description: 'Подписка на ежемесячный доступ к сайту example.com', //назначение
+        amount: 27, //сумма
+        currency: 'RUB', //валюта
+        invoiceId: '1234567', //номер заказа  (необязательно)
+        accountId: 'user@example.com', //идентификатор плательщика (обязательно для создания подписки)
+        data: data
+    },
+    function (options) { // success
+        //действие при успешной оплате
+        console.log(options)
+    },
+    function (reason, options) { // fail
+        //действие при неуспешной оплате
+    });
+};
+document.querySelector('#checkout').onclick = pay
+</script>
+</html>
